@@ -1,0 +1,10 @@
+
+#For backend 
+server_chat_app/env
+server_chat_app/db.sqlite3
+server_chat_app/server/node_modules
+
+#frontend
+chat-app/node_modules
+
+file.jsx
