@@ -3,8 +3,14 @@
 server_chat_app/env
 server_chat_app/db.sqlite3
 server_chat_app/server/node_modules
+server_chat_app/errors.log
+
+server_chat_app/chatapp/migrations
 
 #frontend
 chat-app/node_modules
 
 file.jsx
+env/
+
+requirements.txt

@@ -1,10 +1,13 @@
 # myapp/views.py
+import random
+from django.core.mail import send_mail
 from rest_framework import generics, status
 from rest_framework.response import Response
 from .serializers import LoginSerializer ,RegisterSerializer
 from rest_framework.views import APIView
 from .models import User
 class LoginView(generics.GenericAPIView):
+    
     
     serializer_class = LoginSerializer
 
@@ -95,3 +98,37 @@ class UserBannedView(APIView):
             return Response({"message": "User not found", 'status': status.HTTP_404_NOT_FOUND})
         except Exception as e:
             return Response({"message": str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
+        
+        
+        
+class ForgetPasswordView(APIView):
+    def post(self, request):
+        data = request.data
+        print(data, "this is my data")
+        email = data.get('email')
+        
+        # Check if the email exists
+        email_exist = User.objects.filter(email=email).first()
+        print(email_exist, "-------------------")
+        if not email_exist:
+            print('this is true false')
+            return Response({"message": "Email does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Generate OTP
+        otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+        print(otp, "OTP is generated")
+
+        # Send email
+        send_mail(
+            subject='Password Reset OTP',
+            message=f"Your OTP for renewing the password is: {otp}",
+            from_email='dhavalshelar2012gmail.com',
+            recipient_list=[email],  # Use email here instead of email_exist
+            fail_silently=False,
+        )
+
+        # Save OTP and email in session
+        request.session['reset_otp'] = otp
+        request.session['reset_email'] = email
+
+        return Response({"message": "OTP sent successfully!"}, status=status.HTTP_200_OK)
