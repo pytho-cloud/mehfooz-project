@@ -181,4 +181,4 @@ EMAIL_PORT = 587  # TLS port
 EMAIL_USE_TLS = True  # Enable TLS
 EMAIL_USE_SSL = False  # Disable SSL
 EMAIL_HOST_USER = 'dhavalshelar2012@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'zkxt uhls ssrh puaj'  # Your Gmail App password
+EMAIL_HOST_PASSWORD = 'csyj whhc qqzk dwan'  # Your Gmail App password

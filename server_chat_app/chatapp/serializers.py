@@ -1,7 +1,7 @@
 # myapp/serializers.py
 from rest_framework import serializers
 from .models import User
-
+from .helper import *
 from rest_framework import serializers
 from .models import User
 from django.contrib.auth.hashers import check_password ,make_password
@@ -31,14 +31,20 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-class RegisterSerializer(serializers.ModelSerializer):
+class RegisterSerializer(serializers.Serializer):
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = User
-        fields = ['email', 'password']
+ 
+   
 
-    def create(self, validated_data):
-        user = User(**validated_data)
-        user.save()
-        return user
+
+
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.IntegerField()
+  
+
+    

@@ -1,7 +1,7 @@
 # myapp/admin.py
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
-from .models import User , AnonymousUser
+from .models import User , AnonymousUser ,OTP
 
 class UserAdmin(admin.ModelAdmin):
     list_display = ('email',)  # Display email in the list view
@@ -29,3 +29,4 @@ admin.site.register(User, UserAdmin)
 
 
 admin.site.register(AnonymousUser)
+admin.site.register(OTP)
