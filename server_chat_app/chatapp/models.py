@@ -12,6 +12,7 @@ class User(models.Model):
     password = models.CharField(max_length=255)
     camera_id = models.CharField(max_length=255,null=True,blank=True)
     is_permission = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
 
 
 

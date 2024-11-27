@@ -7,19 +7,29 @@ from .serializers import LoginSerializer ,RegisterSerializer ,VerifyOTPSerialize
 from rest_framework.views import APIView
 from .models import User ,OTP
 from .helper import sendEmailToNewRegistration
-class LoginView(generics.GenericAPIView):
-    
-    
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import OTP
+from .serializers import VerifyOTPSerializer
+from django.utils import timezone
+from rest_framework.generics import GenericAPIView
+
+
+class LoginView(GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        print("this is workiing")
+
+        # Send a response indicating that the user should verify OTP if not verified
+        if not user.is_verified:
+            return Response({'message': 'User not verified. Please verify your OTP.'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'message': 'Login successful', 'user_id': user.id}, status=status.HTTP_200_OK)
+
 
 
 
@@ -31,7 +41,7 @@ class RegisterView(APIView):
 
         if register_serializer.is_valid():
             print("Serializer is valid")
-
+            
             email = register_serializer.validated_data['email']
             password = register_serializer.validated_data['password']
             print(f"Password: {password}")
@@ -42,24 +52,22 @@ class RegisterView(APIView):
             if otp_generation is not True:
                 return Response({"error": "OTP could not be sent"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # Hash the password before saving the user
-           
+            # Check if user already exists
+            if User.objects.filter(email=email).exists():
+                return Response(register_serializer.validated_data, status=status.HTTP_200_OK)
 
+            # Hash password before saving
+           
+            
             # Create the user
             user = User.objects.create(email=email, password=password)
             user.save()
 
             return Response(register_serializer.validated_data, status=status.HTTP_200_OK)
 
-       
         return Response(register_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import OTP
-from .serializers import VerifyOTPSerializer
-from django.utils import timezone
+
 
 class VerifyOTPView(APIView):
     def post(self, request):
@@ -83,6 +91,9 @@ class VerifyOTPView(APIView):
                     
                         return Response({"message": "OTP has expired. Please request a new OTP."}, status=status.HTTP_400_BAD_REQUEST)
                     else:
+                        user = User.objects.get(email= otp_record.email)
+                        user.is_verified = True 
+                        user.save()
                         
                         return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
                 else:
