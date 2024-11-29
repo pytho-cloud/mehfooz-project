@@ -14,6 +14,7 @@ from .models import OTP
 from .serializers import VerifyOTPSerializer
 from django.utils import timezone
 from rest_framework.generics import GenericAPIView
+from .models import AnonymousUser
 
 
 class LoginView(GenericAPIView):
@@ -160,16 +161,23 @@ class UserBannedView(APIView):
 
     def post(self, request):
         data = request.data
-        email = data.get('user')
-        camera_id = data.get('camera')
-        print("this is my data ==============" , email , camera_id)
-        if not email or not camera_id:
-            return Response({"message": "Email and camera ID are required.", 'status': status.HTTP_400_BAD_REQUEST})
-
+        email = data.get('email')
+        camera_id = data.get('camera_id')
+    
+     
         try:
-            user = User.objects.get(email=email)
-            user.camera_id = camera_id 
-            user.save()
+
+            if email and camera_id :
+                print("this is my data bhaifffffffffffffffd")
+                user = User.objects.get(email=email)
+                
+                user.is_permission = False
+                user.save()
+            if not email and camera_id :
+                print("this is my data bhai")
+                user = AnonymousUser.objects.get(camera_id=camera_id)
+                user.is_permission = False
+                user.save()
 
             return Response({"message": "Banned successfully", 'status': status.HTTP_200_OK})
 
@@ -178,7 +186,9 @@ class UserBannedView(APIView):
         except Exception as e:
             return Response({"message": str(e), 'status': status.HTTP_500_INTERNAL_SERVER_ERROR})
         
-        
+
+
+
         
 class ForgetPasswordView(APIView):
     def post(self, request):
@@ -186,7 +196,7 @@ class ForgetPasswordView(APIView):
         print(data, "this is my data")
         email = data.get('email')
         
-        # Check if the email exists
+   
         email_exist = User.objects.filter(email=email).first()
         print(email_exist, "-------------------")
         if not email_exist:
@@ -211,3 +221,46 @@ class ForgetPasswordView(APIView):
         request.session['reset_email'] = email
 
         return Response({"message": "OTP sent successfully!"}, status=status.HTTP_200_OK)
+    
+
+
+
+class AnonymousUserLogin(APIView):
+
+    def post(self, request):
+        data = request.data
+        print(data, "Received data")
+        
+        camera_id = data.get('cameraId')
+        
+        if not camera_id:
+            return Response({
+                'message': 'cameraId is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Try to get the AnonymousUser with the given camera_id
+            AUser = AnonymousUser.objects.get(camera_id=camera_id)
+
+            # If the user exists, check if the user has permission
+            if AUser.is_permission:
+                return Response({
+                    'message': "User exists and permission is valid."
+                }, status=status.HTTP_200_OK)
+            else:
+                # If the user is banned (permission is False)
+                return Response({
+                    'message': "You are banned from using the camera.",
+                    'status': 403
+                }, status=status.HTTP_403_FORBIDDEN)
+
+        except AnonymousUser.DoesNotExist:
+            # If the user does not exist, create a new AnonymousUser with permission
+            AUser = AnonymousUser.objects.create(
+                camera_id=camera_id,
+                is_permission=True  # Default to permission = True
+            )
+            return Response({
+                'message': "New user created with permission." ,
+                'status': 200
+            }, status=status.HTTP_201_CREATED)

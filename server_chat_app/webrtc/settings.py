@@ -25,13 +25,13 @@ SECRET_KEY = 'django-insecure-y2y@&)j=qehrdl#c3d-z($&0h0xu(u-n5f8nxk0xn0f@olpbgf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-SECURE_SSL_REDIRECT = False
+
 
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    'https://192.168.0.121:3000'
+    "https://localhost:3000",
+    'https://192.168.0.118:3000'
      # Add your frontend URL
   
 ]
