@@ -239,26 +239,27 @@ class AnonymousUserLogin(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Try to get the AnonymousUser with the given camera_id
+          
             AUser = AnonymousUser.objects.get(camera_id=camera_id)
 
-            # If the user exists, check if the user has permission
+
             if AUser.is_permission:
                 return Response({
-                    'message': "User exists and permission is valid."
+                    'message': "User exists and permission is valid." ,
+                     'status': 200
                 }, status=status.HTTP_200_OK)
             else:
-                # If the user is banned (permission is False)
+         
                 return Response({
                     'message': "You are banned from using the camera.",
                     'status': 403
                 }, status=status.HTTP_403_FORBIDDEN)
 
         except AnonymousUser.DoesNotExist:
-            # If the user does not exist, create a new AnonymousUser with permission
+           
             AUser = AnonymousUser.objects.create(
                 camera_id=camera_id,
-                is_permission=True  # Default to permission = True
+                is_permission=True  
             )
             return Response({
                 'message': "New user created with permission." ,
